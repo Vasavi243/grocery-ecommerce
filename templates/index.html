@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5 bg-success text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Fresh Groceries Delivered to Your Door</h1>
+                <p class="lead mb-4">Shop from our wide selection of fresh fruits, vegetables, dairy, and more. Get same-day delivery on all orders!</p>
+                <a href="#products" class="btn btn-light btn-lg">Shop Now <i class="bi bi-arrow-right ms-2"></i></a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-basket display-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Shop by Category</h2>
+        <div class="row g-3">
+            {% for category in categories %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <a href="{{ url_for('main.index', category=category) }}" class="text-decoration-none">
+                    <div class="category-card card h-100 text-center p-3 border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-shop display-4 text-success mb-3"></i>
+                            <h5 class="card-title text-dark">{{ category }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Featured Products</h2>
+        <div class="row g-4">
+            {% for product in featured_products %}
+            <div class="col-6 col-md-4 col-lg-2">
+                {% include '_product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- All Products -->
+<section id="products" class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                {% if selected_category %}
+                    {{ selected_category }}
+                {% elif search_query %}
+                    Search Results for "{{ search_query }}"
+                {% else %}
+                    All Products
+                {% endif %}
+            </h2>
+            {% if selected_category or search_query %}
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-success">Clear Filters</a>
+            {% endif %}
+        </div>
+        
+        {% if products.items %}
+        <div class="row g-4">
+            {% for product in products.items %}
+            <div class="col-6 col-md-4 col-lg-3">
+                {% include '_product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if products.pages > 1 %}
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if products.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=products.prev_num, category=selected_category, search=search_query) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in products.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                    {% if page_num %}
+                        {% if page_num == products.page %}
+                        <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.index', page=page_num, category=selected_category, search=search_query) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=products.next_num, category=selected_category, search=search_query) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-search display-1 text-muted"></i>
+            <h4 class="mt-3 text-muted">No products found</h4>
+            <p class="text-muted">Try adjusting your search or filters</p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-success">View All Products</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
